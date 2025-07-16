@@ -9,14 +9,20 @@ const app = express();
 // })
 
 
-app.get('/user', (req,res)=>{
+app.get('/user', (req,res,next)=>{
     res.send({
         firstname:"Nitin"
+    })
+    next();
+},
+ (req,res)=>{
+    res.send({
+        lastname:"choudhary"
     })
 })
 
 app.post('/user', (req,res)=>{
-    res.send('data stored-------')
+    res.send('data stored 2-------')
 })
 
 
