@@ -1,33 +1,34 @@
 const express = require('express');
-const { adminAuth, userAuth } = require('./middlewares/auth')
+const connectDB = require('./config/database');
+const User = require('./models/user')
+
+
 const app = express();
 
-
-app.use('/admin',adminAuth, (req,res)=>{
-    // throw new Error("--------");
+app.post('/signup', async (req, res) => {
+    const user = new User({
+        firstName: 'Nitin',
+        lastName: 'Choudhary',
+        email: 'nitinchoudhary0306@gmail.com',
+        password: 'Nitin@1996',
+        gender: 'Male'
+    });
 
     try {
-        res.send('Admin is loggedIn--');
+        await user.save()
+        res.send('User data is saved successfull')   
     } catch (error) {
-        res.status(500).send("Ther is some error---")
-    }
-    
-})
-
-app.use('/user', userAuth, (req,res)=>{
-    res.send("Get all the data of users----")
-})
-
-
-app.use('/',(err, req, res, next)=>{
-    if (err){
-        res.status(500).send("Something wents wrong")
+        res.status(400).send("Error in signup" + error.message)
     }
 })
 
-
-
-app.listen(3000, ()=>{
-    console.log("Server is running---");
-    
+connectDB()
+.then(() => {
+    console.log('Connected to the database--');
+    app.listen(3000,() => {
+        console.log("Server is running on port 3000--")
+    })
+})
+.catch((err) => {
+    console.log(err)
 })
