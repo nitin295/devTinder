@@ -1,28 +1,14 @@
 const express = require('express');
-
-
+const { adminAuth, userAuth } = require('./middlewares/auth')
 const app = express();
 
-//Request Handler
-// app.use('/',(req,res)=>{
-//     res.send("server is running on 3000");
-// })
 
-
-app.get('/user', (req,res,next)=>{
-    res.send({
-        firstname:"Nitin"
-    })
-    next();
-},
- (req,res)=>{
-    res.send({
-        lastname:"choudhary"
-    })
+app.use('/admin',adminAuth, (req,res)=>{
+    res.send('Admin is loggedIn--')
 })
 
-app.post('/user', (req,res)=>{
-    res.send('data stored 2-------')
+app.use('/user', userAuth, (req,res)=>{
+    res.send("Get all the data of users----")
 })
 
 
