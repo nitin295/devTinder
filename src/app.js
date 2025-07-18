@@ -35,7 +35,7 @@ app.get('/getUsers', async (req,res) => {
     }
 });
 
-// Get All the Users
+// Get: all the Users
 app.get('/userFeeds', async (req,res) => {
     try {
         const allUsers = await User.find({});
@@ -49,6 +49,32 @@ app.get('/userFeeds', async (req,res) => {
         res.status(404).send('Something wents wrong')
     }
 });
+
+// Delete: delete user by userId
+app.delete('/deleteUser', async (req,res) => {
+    const userId = req.body.userId;    
+    try {
+       const deleteUser = await User.findByIdAndDelete( userId );
+       res.send('User is deleted successfully') 
+    } catch (error) {           
+        res.status(400).send('Something wents wrong',error)
+    }
+})
+
+// Patch: update user data 
+app.patch('/updateUser', async (req,res) => {
+    const userId = req.body.userId;
+    const updatedData = req.body;    
+    try {
+        const updateUser = await User.findByIdAndUpdate( userId, updatedDataA );
+        console.log('updateuser--',updateUser)
+        res.status(200).send('user is updated successfully')
+    } catch (error) {
+        res.status(400).send('Something went wrongA')
+    }
+})
+
+
 
 
 // Server is listing on 3000--
