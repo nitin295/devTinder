@@ -18,7 +18,6 @@ app.post('/signup', async (req, res) => {
     }
 });
 
-
 // Get: single User behalf of User.emaliId
 app.get('/getUsers', async (req,res) => {
     const userEmail = req.body.emailId;
@@ -62,17 +61,32 @@ app.delete('/deleteUser', async (req,res) => {
 })
 
 // Patch: update user data 
-app.patch('/updateUser', async (req,res) => {
-    const userId = req.body.userId;
+app.patch('/updateUser/:userId', async (req,res) => {    
+    const userId = req.params?.userId;
     const updatedData = req.body;    
     try {
-        const updateUser = await User.findByIdAndUpdate( userId, updatedData, {
+        const ALLOW_UPDATS = [
+            'firstName',
+            'lastName',
+            'password',
+            'gender'
+        ]
+        const isAllowUpdate = Object.keys(updatedData).every((key) => {
+            return ALLOW_UPDATS.includes(key)
+        })
+        if(!isAllowUpdate){
+            throw new Error('fields are not allowed')
+        }else {
+            
+        }    
+
+       const updateUser = await User.findByIdAndUpdate( userId, updatedData, {
             returnDocument: 'after',
             runValidators: true
         } );
         res.status(200).send('user is updated successfully')
     } catch (error) {
-        res.status(400).send('Something went wrongA')
+        res.status(400).send('Something went wrong')
     }
 })
 
@@ -90,4 +104,4 @@ connectDB()
 })
 .catch((err) => {
     console.log(err)
-})
+}) 
