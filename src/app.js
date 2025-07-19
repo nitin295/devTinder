@@ -1,6 +1,9 @@
 const express = require('express');
 const connectDB = require('./config/database');
-const User = require('./models/user')
+const User = require('./models/user');
+const {validateSignUpData} = require('./utils/validation');
+const bcrypt = require('bcrypt');
+const validator = require('validator');
 
 
 const app = express();
@@ -8,8 +11,20 @@ const app = express();
 app.use(express.json());
 // Post: for sign Up to User--
 app.post('/signup', async (req, res) => {
+    // validation of data
+    validateSignUpData(req);
+    const { firstName, lastName, emailId, password } = req.body;
+
+    // hashing the password
+    const passwordBcrypt = await bcrypt.hash(password, 10);
+
     // creating new instance for user model 
-    const user = new User(req.body);    
+    const user = new User({
+        firstName,
+        lastName,
+        emailId,
+        password: passwordBcrypt
+    });    
     try {
         await user.save()
         res.send('User data is saved successfull')   
@@ -87,6 +102,32 @@ app.patch('/updateUser/:userId', async (req,res) => {
         res.status(200).send('user is updated successfully')
     } catch (error) {
         res.status(400).send('Something went wrong')
+    }
+})
+
+// Post: login Api
+app.post('/login', async (req,res) => {
+    try {
+        const { emailId, password } = req.body;
+        if(!validator.isEmail(emailId)){
+            throw new Error('Enter email in correct formate')
+        }
+                
+        const user = await User.findOne({ emailId });
+        if(!user){
+            throw new Error('User not found')
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if(isPasswordValid){
+            res.status(200).send('Login successfully');
+        }
+        else{
+            res.status(401).send('Invalid credential')
+        }
+        
+    } catch (error) {
+       res.status(401).send('Invalid credentials');
     }
 })
 
