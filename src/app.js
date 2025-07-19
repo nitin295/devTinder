@@ -4,11 +4,16 @@ const User = require('./models/user');
 const {validateSignUpData} = require('./utils/validation');
 const bcrypt = require('bcrypt');
 const validator = require('validator');
-
+const jwt = require('jsonwebtoken');
+const cookiesParser = require('cookie-parser');
+const {userAuth} = require('./middlewares/auth')
 
 const app = express();
 
 app.use(express.json());
+app.use(cookiesParser());
+
+
 // Post: for sign Up to User--
 app.post('/signup', async (req, res) => {
     // validation of data
@@ -112,7 +117,7 @@ app.post('/login', async (req,res) => {
         if(!validator.isEmail(emailId)){
             throw new Error('Enter email in correct formate')
         }
-                
+
         const user = await User.findOne({ emailId });
         if(!user){
             throw new Error('User not found')
@@ -120,6 +125,10 @@ app.post('/login', async (req,res) => {
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if(isPasswordValid){
+            // create JWT 
+            const jwtToken = await jwt.sign({_id: user._id }, 'Nitin@1996');
+            // add JWT cookies and send back the response to user 
+            res.cookie('token', jwtToken)
             res.status(200).send('Login successfully');
         }
         else{
@@ -128,6 +137,30 @@ app.post('/login', async (req,res) => {
         
     } catch (error) {
        res.status(401).send('Invalid credentials');
+    }
+})
+
+// Get: profile
+app.get('/profile', userAuth, async (req,res) => {
+    try {
+        // const cookie = req.cookies;
+        
+        // const { token } = cookie;        
+        // if(!token){
+        //     throw new Error('Please login again');
+        // }
+        // const decodetoken = jwt.verify(token,'Nitin@1996');
+        // const { _id } = decodetoken;
+        
+        // if(!_id){
+        //     throw new Error('Please login again');
+        // }
+        // const userProfile = await User.findById({ _id });
+        const userData = req.user;        
+        res.status(200).send(userData);
+        
+    } catch (error) {
+        res.status(401).send('Login again')
     }
 })
 
