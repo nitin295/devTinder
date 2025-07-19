@@ -124,11 +124,13 @@ app.post('/login', async (req,res) => {
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
+        // const isPasswordValid = await user.getPassword(password);
+        
         if(isPasswordValid){
             // create JWT 
-            const jwtToken = await jwt.sign({_id: user._id }, 'Nitin@1996');
+            const token = await jwt.sign({_id: user._id }, 'Nitin@1996', { expiresIn: '1d'});
             // add JWT cookies and send back the response to user 
-            res.cookie('token', jwtToken)
+            res.cookie('token', token)
             res.status(200).send('Login successfully');
         }
         else{
