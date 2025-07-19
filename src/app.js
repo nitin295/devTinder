@@ -66,8 +66,10 @@ app.patch('/updateUser', async (req,res) => {
     const userId = req.body.userId;
     const updatedData = req.body;    
     try {
-        const updateUser = await User.findByIdAndUpdate( userId, updatedDataA );
-        console.log('updateuser--',updateUser)
+        const updateUser = await User.findByIdAndUpdate( userId, updatedData, {
+            returnDocument: 'after',
+            runValidators: true
+        } );
         res.status(200).send('user is updated successfully')
     } catch (error) {
         res.status(400).send('Something went wrongA')
@@ -80,6 +82,7 @@ app.patch('/updateUser', async (req,res) => {
 // Server is listing on 3000--
 connectDB()
 .then(() => {
+    User.syncIndexes();
     console.log('Connected to the database--');
     app.listen(3000,() => {
         console.log("Server is running on port 3000--")
