@@ -2,6 +2,7 @@ const express = require('express');
 const { userAuth } = require('../middlewares/auth');
 const ConnectionRequestModel = require('../models/connectionRequest');
 const user = require('../models/user');
+const mongoose = require('mongoose');
 
 const router = express.Router();
 
@@ -69,5 +70,44 @@ router.post('/request/send/:status/:toUserId',
         });
     }
 });
+
+router.post('/request/review/:status/:requestId', 
+    userAuth, 
+    async (req,res) => {
+    try {
+        const loggedInUser = req.user;
+        const { status, requestId } = req.params;
+        
+        const allowedStatus = ['accepted','rejected']
+        if(!allowedStatus.includes(status)){
+            return res.json({
+                status: 401,
+                message: 'Status not valid'
+            })
+        }        
+        const connectionRequest = await ConnectionRequestModel.findOne({
+            _id: new mongoose.Types.ObjectId(requestId),
+        }); 
+        
+        if(!connectionRequest){
+            return res.json({
+                status: 404,
+                message: 'connection request not find'
+            })
+        }
+        connectionRequest.status = status;        
+        const data = await connectionRequest.save();
+        res.json({
+            status: 200,
+            data: data,
+        })
+        
+    } catch (error) {
+       res.json({
+        status: 400,
+        message: 'Something wents wrong' + error.message
+       }) 
+    }
+})
 
 module.exports = router;
