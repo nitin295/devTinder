@@ -7,6 +7,7 @@ const userAuth = async (req,res,next)=> {
         const { token } = req.cookies;
         const decodeObj = await jwt.verify(token,'Nitin@1996');
         const { _id } = decodeObj;
+        
         if(!_id){
             throw new Error('Something wends wrong');
         }
@@ -15,6 +16,7 @@ const userAuth = async (req,res,next)=> {
             throw new Error('Something wents wrong');
         }
         req.user = userData;
+        
         next();
    } catch (error) {
         res.status(400).send('Something wents wrong')
